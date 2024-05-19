@@ -8,15 +8,16 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useAction } from 'next-safe-action/hooks';
+import { useAction, useOptimisticAction } from 'next-safe-action/hooks';
 
 type Props = {
 	todos: Todo[];
 };
 const CreateTodoForm = ({ todos }: Props) => {
-	const { execute, status } = useAction(createTodo, {
-		onSuccess: () => {
-			reset();
+	const { execute, status, optimisticState } = useOptimisticAction(createTodo, {
+		currentState: todos,
+		updateFn: (prevState, newTodo) => {
+			return [...prevState, newTodo];
 		},
 	});
 	const { register, handleSubmit, reset } = useForm<
@@ -33,7 +34,7 @@ const CreateTodoForm = ({ todos }: Props) => {
 				</Button>
 			</form>
 			<div className='space-y-4 mt-12'>
-				{todos.map(todo => (
+				{optimisticState.map(todo => (
 					<p key={todo.id}>{todo.title}</p>
 				))}
 			</div>

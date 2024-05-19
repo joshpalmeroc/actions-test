@@ -14,13 +14,14 @@ export const createTodo = actionClient
 	.action(async ({ parsedInput: { title } }) => {
 		try {
 			await sleep(2000);
-			await prisma.todo.create({
+			const todo = await prisma.todo.create({
 				data: {
 					title,
 				},
 			});
+			revalidatePath('/');
+			return todo;
 		} catch (error) {
 			console.error(error);
 		}
-		revalidatePath('/');
 	});
